@@ -36,7 +36,7 @@
     - 파이썬 스타일 가이드 (PEP8) 를 준수하였는지 확인
     - 코드 중복을 최소화하고 범용적으로 사용할 수 있도록 함수화/모듈화했는지 확인
         - 중요! 잘 작성되었다고 생각되는 부분을 캡쳐해 근거로 첨부
-          ![Image](https://github.com/user-attachments/assets/a97a6b32-04d8-4e74-a7ea-e832ac97eb3c)
+          ![Image](https://github.com/user-attachments/assets/1d5fdc14-f780-4deb-bbad-0cd8e49e8e4d)
 
 
 # 회고(참고 링크 및 코드 개선)
