@@ -50,5 +50,6 @@
 # fetchData() 함수를 작성하는 부분에서 많은 오류가 발생하였는데, 이 부분을 제대로 처리하지 못한 것 같아 아쉽습니다.
 # GPT가 작성한 코드를 그대로 가져 오다 보면 디버깅에서 어려움을 겪는 경우가 많은데, 프로그램의 기본 동작 원리만 잘 이해한다면 좀 더 효율적이고 간결한 코드를 작성할 수 있을 것입니다.(아직 이런 부분은 GPT가 잘 하지 못 하는 부분입니다.)   
 # fetchData() 함수는 아래와 같이 구현하면 훨씬 간결하면서, 직관적으로 볼 수 있습니다.
-  ![Image](https://github.com/user-attachments/assets/2b0fd603-539c-4e98-a4ca-ebae89b4b465)
 ```
+# 참고코드
+![Image](https://github.com/user-attachments/assets/2b0fd603-539c-4e98-a4ca-ebae89b4b465)
