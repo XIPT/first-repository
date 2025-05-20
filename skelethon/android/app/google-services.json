@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "527947394455",
+    "project_id": "skelethon-e6938",
+    "storage_bucket": "skelethon-e6938.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527947394455:android:1686bb2acbdd37f30ce8d2",
+        "android_client_info": {
+          "package_name": "com.example.skelethon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "527947394455-8pd9185bervr69n1u3apgqgju9p4i312.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.skelethon",
+            "certificate_hash": "7fdf0ff35c8d941d402c1734f4b17cd22f70fed0"
+          }
+        },
+        {
+          "client_id": "527947394455-kt983bmpc0f1ga1je4mvfvkqn36ddj6c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.skelethon",
+            "certificate_hash": "9f123cafafba2eb19c330c1900c8e652a2905ec6"
+          }
+        },
+        {
+          "client_id": "527947394455-b0p7v28cd4dngu4v96nmdn8i7af6hqs5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFHmDQg-eaAo_hNbPR5lwL76rkGzAi6wM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "527947394455-b0p7v28cd4dngu4v96nmdn8i7af6hqs5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
