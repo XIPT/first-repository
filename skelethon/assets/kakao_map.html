@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Kakao Map Sample</title>
+    <style>
+        html, body {margin:0; padding:0; height:100%;}
+        #map {width:100%; height:100%;}
+        .hospital-label {
+            display: block;
+            padding: 8px 10px;
+            background: #fff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            white-space: nowrap;
+            min-width: 120px;
+        }
+        .hospital-distance {
+            display: block;
+            margin-top: 4px;
+            color: #666;
+            font-size: 11px;
+            font-weight: normal;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=KAKAO_MAP_API_KEY"></script>
+<script>
+    var mapContainer = document.getElementById('map');
+    var mapOption = {
+      center: new kakao.maps.LatLng(37.5665, 126.9780),  // 기본 위치
+      level: 4
+    };
+    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+    // 📍 내 위치 마커 변수
+    var userMarker = null;
+
+    // 현재 선택된 마커와 인덱스
+    var selectedMarkerIndex = -1;
+    var selectedMarker = null;
+
+    // 선택된 마커의 정보창을 저장할 전역 변수
+    var currentOverlay = null;
+
+    // 빨간색 마커 이미지 생성 (내 위치용)
+    var redMarkerImage = new kakao.maps.MarkerImage(
+        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png', // 빨간 별 마커 이미지 URL
+        new kakao.maps.Size(24, 35), // 마커 이미지 크기
+        {
+            offset: new kakao.maps.Point(12, 35), // 마커 좌표에 일치시킬 이미지 좌표
+            alt: "현재 위치"
+        }
+    );
+
+    // 일반 병원 마커 이미지
+    var normalMarkerImage = new kakao.maps.MarkerImage(
+        'https://t1.daumcdn.net/mapjsapi/images/marker.png',
+        new kakao.maps.Size(29, 42),
+        {
+            offset: new kakao.maps.Point(14, 42),
+            alt: "병원"
+        }
+    );
+
+    // 선택된 병원 마커 이미지 (더 큰 크기)
+    var selectedMarkerImage = new kakao.maps.MarkerImage(
+        'https://t1.daumcdn.net/mapjsapi/images/marker.png',
+        new kakao.maps.Size(50, 72), // 크기를 훨씬 더 크게 설정
+        {
+            offset: new kakao.maps.Point(25, 72), // 오프셋도 비례해서 조정
+            alt: "선택된 병원"
+        }
+    );
+
+    // 사용자 위치 마커 생성 함수
+    function showUserLocation(lat, lng) {
+        // 기존 마커가 있다면 삭제
+        if (userMarker !== null) {
+            userMarker.setMap(null);
+        }
+
+        // 📍 내 위치 마커 생성 (빨간색 마커 이미지 사용)
+        userMarker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(lat, lng),
+            title: '현재 위치',
+            image: redMarkerImage, // 빨간색 마커 이미지 적용
+            zIndex: 9999
+        });
+
+        console.log("사용자 위치 마커 생성 (빨간색):", lat, lng);
+    }
+
+    // Flutter에서 호출하는 위치 이동 함수
+    function moveToLocation(lat, lng) {
+        console.log("Flutter에서 위치 이동 호출됨:", lat, lng);
+        var moveLatLon = new kakao.maps.LatLng(lat, lng);
+        map.setCenter(moveLatLon);
+
+        // 위치 이동 시 자동으로 해당 위치에 마커도 표시
+        showUserLocation(lat, lng);
+    }
+
+    // 선택된 마커의 정보 표시창 띄우기 (커스텀 오버레이 사용)
+    function showMarkerInfo(index) {
+        console.log("showMarkerInfo 호출됨: 인덱스=" + index);
+
+        if (index >= 0 && index < originalData.length) {
+            // 이전에 열려있는 정보창이 있으면 닫기
+            if (currentOverlay !== null) {
+                currentOverlay.setMap(null);
+                console.log("이전 오버레이 닫힘");
+            }
+
+            var hospital = originalData[index];
+            var marker = markers[index];
+            var position = marker.getPosition();
+
+            // 거리 정보 포맷팅
+            var distanceText = '';
+            if (hospital.distance) {
+                var distanceKm = (parseFloat(hospital.distance) / 1000).toFixed(1);
+                distanceText = '<span class="hospital-distance">' + distanceKm + 'km</span>';
+            }
+
+            // 커스텀 오버레이 생성
+            var content = '<div class="hospital-label">' +
+                          hospital.name +
+                          distanceText +
+                          '</div>';
+
+            var customOverlay = new kakao.maps.CustomOverlay({
+                position: position,
+                content: content,
+                yAnchor: 0.1,  // 마커 위에 표시
+                zIndex: 10000
+            });
+
+            // 오버레이 표시
+            customOverlay.setMap(map);
+            console.log("커스텀 오버레이 표시됨");
+
+            // 현재 오버레이 저장
+            currentOverlay = customOverlay;
+        } else {
+            console.log("유효하지 않은 인덱스 (showMarkerInfo): " + index);
+        }
+    }
+
+    // 웹뷰로 선택된 병원의 인덱스 전달
+    function selectHospital(index) {
+        console.log("selectHospital 호출됨: 인덱스=" + index);
+
+        if (index >= 0 && index < originalData.length) {
+            // 이전에 선택된 마커가 있으면 원래 크기로 복원
+            if (selectedMarker !== null) {
+                console.log("이전 선택 마커 초기화");
+                selectedMarker.setImage(normalMarkerImage);
+            }
+
+            // 새로운 마커 선택
+            var marker = markers[index];
+            console.log("새 마커 크기 변경 시도");
+            marker.setImage(selectedMarkerImage);
+            selectedMarker = marker;
+            selectedMarkerIndex = index;
+            console.log("새 마커 크기 변경 완료");
+        }
+    }
+
+    // 병원 인덱스로 해당 마커 중앙으로 이동하고 선택 표시
+    function moveToHospital(index) {
+        console.log("moveToHospital 호출됨: 인덱스=" + index);
+
+        if (index >= 0 && index < originalData.length) {
+            var hospital = originalData[index];
+            var moveLatLon = new kakao.maps.LatLng(hospital.lat, hospital.lng);
+            map.setCenter(moveLatLon);
+            console.log("지도 중심 이동 완료");
+
+            // 마커 선택 표시
+            selectHospital(index);
+            console.log("마커 선택 완료");
+
+            // 마커 정보창 표시 (약간의 지연 추가)
+            setTimeout(function() {
+                showMarkerInfo(index);
+            }, 100);
+
+            // 맵 위치 이동 후 Flutter에 알림
+            try {
+                window.onMarkerClicked.postMessage(index.toString());
+                console.log("moveToHospital에서 Flutter에 메시지 전송 성공");
+            } catch (e) {
+                console.log("moveToHospital에서 Flutter에 메시지 전송 실패: " + e.message);
+            }
+        } else {
+            console.log("유효하지 않은 인덱스: " + index);
+        }
+    }
+
+    // 🏥 병원 마커 관리
+    var markers = [];
+    var originalData = []; // 원본 데이터 저장
+
+    function clearMarkers() {
+        markers.forEach(function(marker) {
+            marker.setMap(null);
+        });
+        markers = [];
+        originalData = [];
+
+        // 선택 상태 초기화
+        selectedMarkerIndex = -1;
+        selectedMarker = null;
+
+        // 열려있는 오버레이 닫기
+        if (currentOverlay !== null) {
+            currentOverlay.setMap(null);
+            currentOverlay = null;
+        }
+    }
+
+    function addHospitalMarkers(hospitals) {
+        clearMarkers();   // 기존 마커 삭제
+
+        var hospitalList = JSON.parse(hospitals);
+        originalData = hospitalList; // 원본 데이터 저장
+
+        hospitalList.forEach(function(hospital, index) {
+            var marker = new kakao.maps.Marker({
+                map: map,
+                position: new kakao.maps.LatLng(hospital.lat, hospital.lng),
+                title: hospital.name,
+                image: normalMarkerImage // 기본 마커 이미지 적용
+            });
+
+            markers.push(marker);
+
+            // 마커 클릭 이벤트에 로그 추가
+            kakao.maps.event.addListener(marker, 'click', function() {
+                console.log("마커 클릭됨: 인덱스=" + index);
+
+                if (selectedMarker !== null) {
+                    console.log("이전 선택 마커 초기화");
+                    selectedMarker.setImage(normalMarkerImage);
+                }
+
+                console.log("마커 크기 변경 시도");
+                marker.setImage(selectedMarkerImage);
+                selectedMarker = marker;
+                selectedMarkerIndex = index;
+                console.log("마커 크기 변경 완료");
+
+                // 마커 클릭 시 자동으로 정보창 표시
+                showMarkerInfo(index);
+
+                // 웹뷰 브릿지를 통해 Flutter에 메시지 전달
+                try {
+                    window.onMarkerClicked.postMessage(index.toString());
+                    console.log("Flutter에 메시지 전송 성공");
+                } catch (e) {
+                    console.log("Flutter에 메시지 전송 실패: " + e.message);
+                }
+            });
+        });
+    }
+
+    // 본인위치 GPS 다시 잡아주는 함수
+    function moveToCurrentLocation() {
+    console.log("현재 위치로 이동 함수 호출됨");
+
+    // 웹뷰가 초기화될 때 설정한 사용자 위치가 있으면 그 위치로 이동
+    if (userMarker !== null) {
+        var position = userMarker.getPosition();
+        map.setCenter(position);
+        console.log("사용자 위치로 지도 중심 이동");
+
+        // 줌 레벨 조정 (선택 사항)
+        map.setLevel(4);
+    } else {
+        console.log("사용자 위치 마커가 없습니다. moveToLocation을 먼저 호출해주세요.");
+    }
+}
+</script>
+</body>
+</html>
